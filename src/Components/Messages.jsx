@@ -32,7 +32,7 @@ function Messages() {
   }
 
   useEffect(() => {
-    fetchMails(2, 0);
+    fetchMails(20, 0);
   }, []);
 
   async function deleteMail(id) {
@@ -103,7 +103,7 @@ function Messages() {
       {showSeeMore && mails.length > 0 && (
         <div className="flex justify-center">
           <button
-            onClick={() => fetchMails(2, offset)}
+            onClick={() => fetchMails(20, offset)}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300"
           >
             See More
