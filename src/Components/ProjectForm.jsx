@@ -12,6 +12,8 @@ function ProjectForm({ onProjectSaved, projectToEdit }) {
   const [previousImageID, setPreviousImageID] = useState('');
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinnedOrder, setPinnedOrder] = useState('')
 
   useEffect(() => {
     if (projectToEdit) {
@@ -20,12 +22,18 @@ function ProjectForm({ onProjectSaved, projectToEdit }) {
       setGithubLink(projectToEdit.github);
       setLiveLink(projectToEdit.preview);
       setCategory(projectToEdit.category);
-      setPreviousImageID(projectToEdit.ImageID); // Assuming `ImageID` is stored in your database
+      setPreviousImageID(projectToEdit.ImageID);
+      setIsPinned(projectToEdit.isPinned || false);
+      setPinnedOrder(projectToEdit.pinnedOrder || '');
     }
   }, [projectToEdit]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isPinned && (pinnedOrder < 1 || pinnedOrder > 4)) {
+      setNotification({ message: 'Pinned order must be between 1-4.', type: 'error' });
+      return;
+  }
     setLoading(true);
 
     try {
@@ -54,7 +62,9 @@ function ProjectForm({ onProjectSaved, projectToEdit }) {
           imageURL.href, // Use the updated image URL
           githubLink,
           liveLink,
-          category
+          category,
+          isPinned,
+          pinnedOrder
         );
       } else {
         await projectService.createProject(
@@ -63,7 +73,9 @@ function ProjectForm({ onProjectSaved, projectToEdit }) {
           imageURL.href,
           githubLink,
           liveLink,
-          category
+          category,
+          isPinned,
+          pinnedOrder
         );
       }
       onProjectSaved(); // Trigger re-fetch of projects after saving
@@ -171,6 +183,36 @@ function ProjectForm({ onProjectSaved, projectToEdit }) {
           required
         />
       </div>
+      <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                    <input
+                        type="checkbox"
+                        checked={isPinned}
+                        onChange={(e) => setIsPinned(e.target.checked)}
+                        className="mr-2"
+                    />
+                    Pin this project (Max 4)
+                </label>
+            </div>
+
+            {isPinned && (
+                <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Pinned Position (1-4)
+                    </label>
+                    <select
+                        value={pinnedOrder}
+                        onChange={(e) => setPinnedOrder(parseInt(e.target.value))}
+                        className="shadow border rounded w-full py-2 px-3 text-gray-700"
+                        required
+                    >
+                        <option value="">Select position</option>
+                        {[1, 2, 3, 4].map((num) => (
+                            <option key={num} value={num}>{num}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
       <div className="flex items-center justify-between">
         <button
           type="submit"
